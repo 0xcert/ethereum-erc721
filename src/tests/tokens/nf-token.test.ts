@@ -398,3 +398,14 @@ spec.test('throws when trying to burn non existant NFT', async (ctx) => {
 
   await ctx.reverts(() => nftoken.instance.methods.burn(id1).send({ from: owner }), '003002');
 });
+
+spec.test('safeTransfer does not call onERC721Received to constructing contract', async (ctx) => {
+  const sendsToSelfOnConstruct = await ctx.deploy({ 
+    src: './build/sends-to-self-on-construct.json',
+    contract: 'SendsToSelfOnConstruct',
+  });
+
+  const receipt = sendsToSelfOnConstruct.receipt;
+  console.log(receipt.events.Received());
+  ctx.not(receipt.events.Received, undefined); // I want to confirm here that there is only one event (the mint(), and not the safeTransferFrom)
+});
